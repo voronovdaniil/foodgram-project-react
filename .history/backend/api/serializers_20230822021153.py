@@ -320,6 +320,7 @@ class ShowSubscriptionsSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    """ Сериализатор подписок. """
     queryset = User.objects.all()
     user = serializers.PrimaryKeyRelatedField(queryset=queryset)
     author = serializers.PrimaryKeyRelatedField(queryset=queryset)

@@ -67,6 +67,8 @@ class g(APIView):
 
 
 class FavoriteView(APIView):
+    """ Добавление/удаление рецепта из избранного. """
+
     permission_classes = [IsAuthenticated, ]
     pagination_class = CustomPagination
 
@@ -99,12 +101,16 @@ class FavoriteView(APIView):
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Отображение тегов. """
+
     permission_classes = [AllowAny, ]
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Отображение ингредиентов. """
+
     permission_classes = [AllowAny, ]
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
@@ -113,6 +119,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    """ Операции с рецептами: добавление/изменение/удаление/просмотр. """
+
     permission_classes = [IsAuthorOrAdminOrReadOnly, ]
     pagination_class = CustomPagination
     queryset = Recipe.objects.all()
@@ -131,6 +139,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class ShoppongCartView(APIView):
+    """ Добавление рецепта в корзину или его удаление. """
+
     permission_classes = [IsAuthenticated, ]
 
     def post(self, request, id):
@@ -183,6 +193,8 @@ def download_shopping_cart(request):
 
 @api_view(['post'])
 def set_password(request):
+    """Изменить пароль."""
+
     serializer = UserPasswordSerializer(
         data=request.data,
         context={'request': request})

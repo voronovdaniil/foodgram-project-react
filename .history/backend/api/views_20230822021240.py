@@ -131,6 +131,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class ShoppongCartView(APIView):
+    """ Добавление рецепта в корзину или его удаление. """
+
     permission_classes = [IsAuthenticated, ]
 
     def post(self, request, id):
@@ -183,6 +185,8 @@ def download_shopping_cart(request):
 
 @api_view(['post'])
 def set_password(request):
+    """Изменить пароль."""
+
     serializer = UserPasswordSerializer(
         data=request.data,
         context={'request': request})

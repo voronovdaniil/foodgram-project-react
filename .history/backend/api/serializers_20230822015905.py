@@ -143,6 +143,8 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+    """ Сериализатор просмотра модели Рецепт. """
+
     tags = TagSerializer(many=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField()
@@ -186,6 +188,8 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class AddIngredientRecipeSerializer(serializers.ModelSerializer):
+    """ Сериализатор добавления ингредиента в рецепт. """
+
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
 
@@ -223,6 +227,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             )
 
     def create_recipe(self, validated_data):
+        """Создание рецепта. Функция доступна только авторизованному
+        пользователю
+        """
+
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         author = self.context.get('request').user
@@ -232,6 +240,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
+        """Изменение информации о рецепте. Функция доступна только автору"""
+
         RecipeIngredient.objects.filter(recipe=instance).delete()
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
@@ -252,12 +262,16 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
 
 class ShowFavoriteSerializer(serializers.ModelSerializer):
+    """ Сериализатор для отображения избранного. """
+
     class Meta:
         model = Recipe
         fields = ['id', 'user', 'recipe', 'cooking_time']
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
+    """ Сериализатор модели Избранное. """
+
     class Meta:
         model = FavoriteRecipe
         fields = ['user', 'recipe']
@@ -269,6 +283,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
+    """ Сериализатор для списка покупок. """
+
     class Meta:
         model = ShoppingCart
         fields = ['user', 'recipe']
@@ -280,6 +296,8 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
 
 class ShowSubscriptionsSerializer(serializers.ModelSerializer):
+    """ Сериализатор для отображения подписок пользователя. """
+
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -320,6 +338,7 @@ class ShowSubscriptionsSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    """ Сериализатор подписок. """
     queryset = User.objects.all()
     user = serializers.PrimaryKeyRelatedField(queryset=queryset)
     author = serializers.PrimaryKeyRelatedField(queryset=queryset)

@@ -269,6 +269,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
+    """ Сериализатор для списка покупок. """
+
     class Meta:
         model = ShoppingCart
         fields = ['user', 'recipe']
@@ -280,6 +282,8 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
 
 class ShowSubscriptionsSerializer(serializers.ModelSerializer):
+    """ Сериализатор для отображения подписок пользователя. """
+
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -320,6 +324,7 @@ class ShowSubscriptionsSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    """ Сериализатор подписок. """
     queryset = User.objects.all()
     user = serializers.PrimaryKeyRelatedField(queryset=queryset)
     author = serializers.PrimaryKeyRelatedField(queryset=queryset)

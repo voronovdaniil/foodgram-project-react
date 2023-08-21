@@ -183,6 +183,7 @@ def download_shopping_cart(request):
 
 @api_view(['post'])
 def set_password(request):
+
     serializer = UserPasswordSerializer(
         data=request.data,
         context={'request': request})
