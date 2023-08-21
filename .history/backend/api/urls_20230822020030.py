@@ -42,4 +42,4 @@ urlpatterns = [
         ShowSubscriptionsView.as_view(),
         name='subscription'
     ),
-]
+    ]

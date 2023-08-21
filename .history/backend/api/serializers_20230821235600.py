@@ -5,6 +5,7 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+from django.shortcuts import get_object_or_404
 
 
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
@@ -13,7 +14,7 @@ from recipes.models import (Ingredient, Recipe, RecipeIngredient,
 
 User = get_user_model()
 
-ERR_MSG = 'Не удается войти в систему. Проверьте ваши учетные данные.'
+ERR_MSG = 'Не удается войти в систему. Проверьте ваши учетные данные или попробуйте позже.'
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):

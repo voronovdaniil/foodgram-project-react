@@ -19,6 +19,8 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 AUTH_USER_MODEL = 'users.User'
 
+
+
 # Application definition
 
 INSTALLED_APPS = [

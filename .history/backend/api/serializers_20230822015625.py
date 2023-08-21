@@ -13,7 +13,7 @@ from recipes.models import (Ingredient, Recipe, RecipeIngredient,
 
 User = get_user_model()
 
-ERR_MSG = 'Не удается войти в систему. Проверьте ваши учетные данные.'
+ERR_MSG = 'Не удается войти в систему. Проверьте ваши учетные данные или попробуйте позже.'
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):

@@ -9,7 +9,7 @@ from .models import (ShoppingCart,
 
 
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('name', 'color', 'slug')
+    list_display = ('name','color', 'slug')
 
 
 class IngredientAdmin(admin.ModelAdmin):

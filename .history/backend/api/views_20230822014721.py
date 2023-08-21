@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe, 
                             RecipeIngredient, ShoppingCart, Tag, Subscribe)
 
 from users.models import User
