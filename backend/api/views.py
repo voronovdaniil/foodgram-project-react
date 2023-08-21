@@ -56,7 +56,7 @@ class SubscribeView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class ShowSubscriptionsView(APIView):
+class g(APIView):
     """ Отображение подписок. """
 
     permission_classes = [IsAuthenticated, ]
