@@ -100,7 +100,7 @@ class FavoriteView(APIView):
             )
             favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST9('Cannot delete'))
+        return Response(status=status.HTTP_400_BAD_REQUEST9('Can't delete'))
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
