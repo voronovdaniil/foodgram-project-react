@@ -234,7 +234,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         self.create_tags(tags, recipe)
         return recipe
 
-    @transaction.atomic
     def update(self, instance, validated_data):
         RecipeIngredient.objects.filter(recipe=instance).delete()
         ingredients = validated_data.pop('ingredients')

@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
-from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -41,7 +40,7 @@ class SubscribeView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST('Unable to follow'))
+        return Response(status=status.HTTP_400_BAD_REQUEST('Ошибка подписки'))
 
     def delete(self, request, id):
         author = get_object_or_404(User, id=id)
@@ -52,23 +51,19 @@ class SubscribeView(APIView):
             )
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST('Cant unfollow'))
+        return Response(status=status.HTTP_400_BAD_REQUEST('Ошибка отписки'))
 
 
-class ShowSubscriptionsView(ListAPIView):
-    """ Отображение подписок. """
-
+class g(APIView):
     permission_classes = [IsAuthenticated, ]
     pagination_class = CustomPagination
 
     def get(self, request):
-        user = request.user
-        queryset = User.objects.filter(author__user=user)
-        page = self.paginate_queryset(queryset)
+        queryset = User.objects.filter(following__user=request.user)
         serializer = ShowSubscriptionsSerializer(
-            page, many=True, context={'request': request}
+            queryset, context={'request': request}, many=True
         )
-        return self.get_paginated_response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class FavoriteView(APIView):
@@ -89,7 +84,7 @@ class FavoriteView(APIView):
                 serializer.save()
                 return Response(
                     serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST('Unable to create'))
+        return Response(status=status.HTTP_400_BAD_REQUEST(''))
 
     def delete(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
@@ -100,7 +95,7 @@ class FavoriteView(APIView):
             )
             favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST9('Unable to delete'))
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -152,7 +147,7 @@ class ShoppongCartView(APIView):
                 serializer.save()
                 return Response(
                     serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST('Unable to add'))
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
@@ -162,7 +157,7 @@ class ShoppongCartView(APIView):
                 user=request.user, recipe=recipe
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST('Unable to delete'))
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -173,10 +168,10 @@ def download_shopping_cart(request):
     ).values(
         'ingredient__name', 'ingredient__measurement_unit'
     ).annotate(amount=Sum('amount'))
-    for num, ingr in enumerate(ingredients):
+    for num, i in enumerate(ingredients):
         ingredient_list += (
-            f"\n{ingr['ingredient__name']} - "
-            f"{ingr['amount']} {ingr['ingredient__measurement_unit']}"
+            f"\n{i['ingredient__name']} - "
+            f"{i['amount']} {i['ingredient__measurement_unit']}"
         )
         if num < ingredients.count() - 1:
             ingredient_list += ', '

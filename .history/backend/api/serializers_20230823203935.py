@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, get_user_model
 import django.contrib.auth.password_validation as validators
 from django.contrib.auth.hashers import make_password
-from django.db import transaction
+
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -234,7 +234,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         self.create_tags(tags, recipe)
         return recipe
 
-    @transaction.atomic
     def update(self, instance, validated_data):
         RecipeIngredient.objects.filter(recipe=instance).delete()
         ingredients = validated_data.pop('ingredients')

@@ -1,8 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
-from django.db.models import UniqueConstraint
-
 
 User = get_user_model()
 
@@ -19,7 +17,7 @@ class Ingredient(models.Model):
         ordering = ['name']
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        constraints = [
+constraints = [
             UniqueConstraint(
                 fields=['name', 'measurement_unit'],
                 name='ingredient_name_unit_unique'
@@ -86,10 +84,7 @@ class Recipe(models.Model):
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления в минутах',
         validators=[validators.MinValueValidator(
-            1, message='Мин. время приготовления 1 минута'),
-            validators.MaxValueValidator(1,
-                                         message='Макс. пр. пригот. 1 ч.')], )
-
+            1, message='Мин. время приготовления 1 минута'), ])
     published = models.DateTimeField(
         'Дата публикации',
         auto_now_add=True)
@@ -116,10 +111,7 @@ class RecipeIngredient(models.Model):
         default=1,
         validators=(
             validators.MinValueValidator(
-                1, message='Мин. количество ингридиентов 1'),
-            validators.MaxValueValidator(1,
-                                         message='Макс. объем - 10 кг.')
-                ),
+                1, message='Мин. количество ингридиентов 1'),),
         verbose_name='Количество',)
 
     class Meta:
