@@ -22,3 +22,4 @@ class Command(BaseCommand):
                 Ingredient.objects.get_or_create(**ingredients)
 
         self.stdout.write(self.style.SUCCESS('Данные загружены'))
+

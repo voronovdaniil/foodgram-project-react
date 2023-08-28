@@ -1,150 +1,153 @@
-import os
-
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from decouple import Csv, config
+
+DATE_TIME_FORMAT = "%d/%m/%Y %H:%M"
+
+DEBUG = config("DEBUG", default=False, cast=bool)
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECRET_KEY = config("SECRET_KEY", default="string_from_.env")
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=Csv())
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#xj9o(p4cumge4f%6*aam&ust-_b@c%x=38#4yo=nq6er9c4rz'
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://localhost, http://127.0.0.1",
+    cast=Csv(),
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+ROOT_URLCONF = "foodgram.urls"
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-
-AUTH_USER_MODEL = 'users.User'
-
-# Application definition
+WSGI_APPLICATION = "foodgram.wsgi.application"
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'djoser',
-    'django_filters',
-    'users.apps.UsersConfig',
-    'api',
-    'recipes',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "djoser",
+    "django_filters",
+    "api.apps.ApiConfig",
+    "recipes.apps.RecipesConfig",
+    "users.apps.UsersConfig",
+    # 'django_extensions',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-ROOT_URLCONF = 'foodgram.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'foodgram.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": config("DB_ENGINE", default="django.db.backends.postgresql"),
+        "NAME": config("DB_NAME", default="postgres"),
+        "USER": config("POSTGRES_USER", default="postgres"),
+        "PASSWORD": config("POSTGRES_PASSWORD", default="postgres"),
+        "HOST": config("DB_HOST", default="127.0.0.1"),
+        "PORT": config("DB_PORT", default=5432, cast=int),
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+AUTH_USER_MODEL = "users.MyUser"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },  # noqa E501
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-    ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 6,
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ],
 }
 
 DJOSER = {
-    'SERIALIZERS': {
-        'user': 'api.serializers.CustomUserSerializer',
-        'user_create': 'api.serializers.CustomUserCreateSerializer',
-        'current_user': 'api.serializers.CustomUserSerializer',
+    "LOGIN_FIELD": "email",
+    "HIDE_USERS": False,
+    "PERMISSIONS": {
+        "resipe": ("api.permissions.AuthorStaffOrReadOnly,",),
+        "recipe_list": ("api.permissions.AuthorStaffOrReadOnly",),
+        "user": ("api.permissions.OwnerUserOrReadOnly",),
+        "user_list": ("api.permissions.OwnerUserOrReadOnly",),
     },
-    'PERMISSIONS': {
-        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
-        'user_list': ['rest_framework.permissions.AllowAny'],
+    "SERIALIZERS": {
+        "user": "api.serializers.UserSerializer",
+        "user_list": "api.serializers.UserSerializer",
+        "current_user": "api.serializers.UserSerializer",
+        "user_create": "api.serializers.UserSerializer",
     },
-    'HIDE_USERS': False,
 }
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = "ru"
+TIME_ZONE = "UTC"
 USE_I18N = True
-
 USE_TZ = True
 
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "static"
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / MEDIA_URL
 
-STATIC_URL = '/static/'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+PASSWORD_RESET_TIMEOUT = 60 * 60  # 1 hour
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django.db.backends": {
+            "level": "DEBUG",  # if DEBUG else 'ERROR',
+            "handlers": [
+                "console",
+            ],
+        },
+    },
+}
