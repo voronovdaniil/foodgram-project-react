@@ -11,9 +11,9 @@ SECRET_KEY = os.getenv('TOKEN', 'default-token')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['51.250.110.255', 'localhost', '127.0.0.1', 'yandexfoodgram.ddns.net']
+ALLOWED_HOSTS = ['51.250.110.255', 'localhost', '127.0.0.1', 'yandexfoodgram.ddns.net	']
 
-CSRF_TRUSTED_ORIGINS = ['https://yandexfoodgram.ddns.net', 'https://51.250.110.255']
+CSRF_TRUSTED_ORIGINS = ['https://*.mydomain.com','https://*.127.0.0.1']
 
 
 
