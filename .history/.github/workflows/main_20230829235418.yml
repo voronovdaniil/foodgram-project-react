@@ -16,8 +16,8 @@ jobs:
         # ведь эта база будет работать только во время прогона тестов
         env:
           POSTGRES_USER: django
-          POSTGRES_PASSWORD: django
-          POSTGRES_DB: django
+          POSTGRES_PASSWORD: d
+          POSTGRES_DB: postgres
         ports:
           - 5432:5432
         # Эта конструкция описывает проверку готовности сервиса postgres

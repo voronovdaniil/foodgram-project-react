@@ -15,9 +15,9 @@ jobs:
         # Указываем имя тестовой базы, имя и пароль пользователя в открытом виде,
         # ведь эта база будет работать только во время прогона тестов
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
+          POSTGRES_USER: django
+          POSTGRES_PASSWORD: django
+          POSTGRES_DB: django
         ports:
           - 5432:5432
         # Эта конструкция описывает проверку готовности сервиса postgres
@@ -42,9 +42,9 @@ jobs:
 
     - name: Test with flake8 and django tests
       env:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_DB: postgres
+        POSTGRES_USER: django
+        POSTGRES_PASSWORD: django
+        POSTGRES_DB: django
         # Сервер БД запущен в Docker, но его порт проброшен на хост
         # Поэтому подключаемся к 127.0.0.1:5432
         DB_HOST: 127.0.0.1
@@ -173,4 +173,3 @@ jobs:
           sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
           sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
           sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /app/backend_static/static/
-          
