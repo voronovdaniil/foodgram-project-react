@@ -160,4 +160,4 @@ DJOSER = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = ['http://yandexfoodgramhub.ddns.net']
+CSRF_TRUSTED_ORIGINS = ['httpyandexfoodgramhub.ddns.net	']
