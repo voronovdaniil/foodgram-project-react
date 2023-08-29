@@ -1,283 +1,197 @@
-from api.mixins import AddDelViewMixin
-from api.paginators import PageLimitPagination
-from api.permissions import (
-    AdminOrReadOnly,
-    AuthorStaffOrReadOnly,
-    DjangoModelPermissions,
-    IsAuthenticated,
-)
-from api.serializers import (
-    IngredientSerializer,
-    RecipeSerializer,
-    ShortRecipeSerializer,
-    TagSerializer,
-    UserSubscribeSerializer,
-)
-from core.enums import Tuples, UrlQueries
-from core.services import create_shoping_list, maybe_incorrect_layout
-from django.contrib.auth import get_user_model
-from django.core.handlers.wsgi import WSGIRequest
-from django.db.models import Q, QuerySet
+from django.contrib.auth.hashers import make_password
 from django.http.response import HttpResponse
-from djoser.views import UserViewSet as DjoserUserViewSet
-from recipes.models import Carts, Favorites, Ingredient, Recipe, Tag
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.routers import APIRootView
-from rest_framework.status import HTTP_400_BAD_REQUEST
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from users.models import Subscriptions
 
-User = get_user_model()
+from .serializers import (
+    CustomUserSerializer,
+    FavoriteRecipeSerializer,
+    IngredientSerializer,
+    RecipeCreateUpdateSerializer,
+    RecipeSerializer,
+    RecipeShoppingListSerializer,
+    SubscriptionsSerializer,
+    TagSerializer
+)
+from .filters import IngredientFilter, RecipeFilter
+from .permissions import AuthorOnly
+from recipes.models import Ingredient, Recipe, Tag
+from users.models import Follow, User
+from .services import get_ingredients
 
 
-class BaseAPIRootView(APIRootView):
-    """Базовые пути API приложения."""
-
-
-class UserViewSet(DjoserUserViewSet, AddDelViewMixin):
-    """Работает с пользователями.
-
-    ViewSet для работы с пользователми - вывод таковых,
-    регистрация.
-    Для авторизованных пользователей —
-    возможность подписаться на автора рецепта.
+class CustomUserViewSet(UserViewSet):
     """
+    Вьюсет обработки всех запросов
+    пользователей и  подписок.
+    """
+    queryset = User.objects.all()
+    serializer_class = CustomUserSerializer
 
-    pagination_class = PageLimitPagination
-    permission_classes = (DjangoModelPermissions,)
-    add_serializer = UserSubscribeSerializer
-    link_model = Subscriptions
-
-    @action(detail=True, permission_classes=(IsAuthenticated,))
-    def subscribe(self, request: WSGIRequest, id: int | str) -> Response:
-        """Создаёт/удалет связь между пользователями.
-
-        Вызов метода через url: */user/<int:id>/subscribe/.
-
-        Args:
-            request (WSGIRequest): Объект запроса.
-            id (int):
-                id пользователя, на которого желает подписаться
-                или отписаться запрашивающий пользователь.
-
-        Returns:
-            Responce: Статус подтверждающий/отклоняющий действие.
+    @action(methods=['POST'],
+            detail=False,
+            permission_classes=[permissions.IsAuthenticated])
+    def set_password(self, request):
         """
-
-    @subscribe.mapping.post
-    def create_subscribe(
-        self, request: WSGIRequest, id: int | str
-    ) -> Response:
-        return self._create_relation(id)
-
-    @subscribe.mapping.delete
-    def delete_subscribe(
-        self, request: WSGIRequest, id: int | str
-    ) -> Response:
-        return self._delete_relation(Q(author__id=id))
-
-    @action(
-        methods=("get",), detail=False, permission_classes=(IsAuthenticated,)
-    )
-    def subscriptions(self, request: WSGIRequest) -> Response:
-        """Список подписок пользоваетеля.
-
-        Вызов метода через url: */user/<int:id>/subscribtions/.
-
-        Args:
-            request (WSGIRequest): Объект запроса.
-
-        Returns:
-            Responce:
-                401 - для неавторизованного пользователя.
-                Список подписок для авторизованного пользователя.
+        Обрабатка эндпоинта '/set_password' -
+        изменение пароля.
         """
-        pages = self.paginate_queryset(
-            User.objects.filter(subscribers__user=self.request.user)
+        user = self.request.user
+        if user.is_anonymous:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        new_password = request.data.get('new_password')
+        if not new_password:
+            return Response(
+                {'error': '"new_password": обязательное поле для заполнения'},
+                status=status.HTTP_400_BAD_REQUEST)
+        user.password = make_password(new_password)
+        user.save()
+        return Response({'status': 'password set'})
+
+    @action(methods=['POST', 'DELETE'], detail=True,
+            permission_classes=[permissions.IsAuthenticated])
+    def subscribe(self, request, id):
+        """
+        Авторизированный пользователь
+        добавляет/удалет подписку на другого пользователя.
+        """
+        user = request.user
+        author = get_object_or_404(User, id=id)
+        subscription = Follow.objects.filter(user=user, author=author)
+        if request.method == 'POST':
+            if subscription.exists():
+                return Response({'error': f'Вы уже подписаны на {author}'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            if user == author:
+                return Response({'error': 'Невозможно подписаться на себя'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            serializer = SubscriptionsSerializer(
+                author,
+                context={'request': request})
+            Follow.objects.create(user=user, author=author)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if subscription.exists():
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'error': f'Вы не подписаны на пользователя {author}'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['GET'],
+            detail=False,
+            permission_classes=[permissions.IsAuthenticated])
+    def subscriptions(self, request):
+        """
+        Авторизированный пользователь
+        получает список своих подписок.
+        """
+        subscriptions = User.objects.filter(
+            following__user=self.request.user
         )
-        serializer = UserSubscribeSerializer(pages, many=True)
+        page = self.paginate_queryset(subscriptions)
+        serializer = SubscriptionsSerializer(
+            page, many=True,
+            context={'request': request})
         return self.get_paginated_response(serializer.data)
 
 
-class TagViewSet(ReadOnlyModelViewSet):
-    """Работает с тэгами.
-
-    Изменение и создание тэгов разрешено только админам.
+class RecipeViewSet(viewsets.ModelViewSet):
     """
-
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    permission_classes = (AdminOrReadOnly,)
-
-
-class IngredientViewSet(ReadOnlyModelViewSet):
-    """Работет с игридиентами.
-
-    Изменение и создание ингридиентов разрешено только админам.
+    Вся работа с рецептами: детально и в списках.
+    Списки рецептов: главный, избранное, корзина;
+    добавление, удаление и изменение рецептов в
+    этих списках; скачивание файла.
     """
+    queryset = Recipe.objects.all()
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = RecipeCreateUpdateSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
-    queryset = Ingredient.objects.all()
-    serializer_class = IngredientSerializer
-    permission_classes = (AdminOrReadOnly,)
-
-    def get_queryset(self) -> list[Ingredient]:
-        """Получает queryset в соответствии с параметрами запроса.
-
-        Реализован поиск объектов по совпадению в начале названия,
-        также добавляются результаты по совпадению в середине.
-        При наборе названия в неправильной раскладке - латинские символы
-        преобразуются в кириллицу (для стандартной раскладки).
-        Также прописные буквы преобразуются в строчные,
-        так как все ингридиенты в базе записаны в нижнем регистре.
-
-        Returns:
-            list[Ingredient]: Список найденых ингридиентов.
+    def get_permissions(self):
         """
-        name: str = self.request.query_params.get(UrlQueries.SEARCH_ING_NAME)
-        queryset = self.queryset
-
-        if not name:
-            return queryset
-
-        name = maybe_incorrect_layout(name)
-        start_queryset = queryset.filter(name__istartswith=name)
-        start_names = (ing.name for ing in start_queryset)
-        contain_queryset = queryset.filter(name__icontains=name).exclude(
-            name__in=start_names
-        )
-        return list(start_queryset) + list(contain_queryset)
-
-
-class RecipeViewSet(ModelViewSet, AddDelViewMixin):
-    """Работает с рецептами.
-
-    Вывод, создание, редактирование, добавление/удаление
-    в избранное и список покупок.
-    Отправка текстового файла со списком покупок.
-    Для авторизованных пользователей — возможность добавить
-    рецепт в избранное и в список покупок.
-    Изменять рецепт может только автор или админы.
-    """
-
-    queryset = Recipe.objects.select_related("author")
-    serializer_class = RecipeSerializer
-    permission_classes = (AuthorStaffOrReadOnly,)
-    pagination_class = PageLimitPagination
-    add_serializer = ShortRecipeSerializer
-
-    def get_queryset(self) -> QuerySet[Recipe]:
-        """Получает queryset в соответствии с параметрами запроса.
-
-        Returns:
-            QuerySet[Recipe]: Список запрошенных объектов.
+        Просмотр списка рецептов и списка по id
+        доступен всем.
         """
-        queryset = self.queryset
+        if self.action in ['list', 'retrieve']:
+            return (permissions.AllowAny(),)
+        return super().get_permissions()
 
-        tags: list = self.request.query_params.getlist(UrlQueries.TAGS.value)
-        if tags:
-            queryset = queryset.filter(tags__slug__in=tags).distinct()
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return RecipeSerializer
+        return RecipeCreateUpdateSerializer
 
-        author: str = self.request.query_params.get(UrlQueries.AUTHOR.value)
-        if author:
-            queryset = queryset.filter(author=author)
-
-        # Следующие фильтры только для авторизованного пользователя
-        if self.request.user.is_anonymous:
-            return queryset
-
-        is_in_cart: str = self.request.query_params.get(UrlQueries.SHOP_CART)
-        if is_in_cart in Tuples.SYMBOL_TRUE_SEARCH.value:
-            queryset = queryset.filter(in_carts__user=self.request.user)
-        elif is_in_cart in Tuples.SYMBOL_FALSE_SEARCH.value:
-            queryset = queryset.exclude(in_carts__user=self.request.user)
-
-        is_favorite: str = self.request.query_params.get(UrlQueries.FAVORITE)
-        if is_favorite in Tuples.SYMBOL_TRUE_SEARCH.value:
-            queryset = queryset.filter(in_favorites__user=self.request.user)
-        if is_favorite in Tuples.SYMBOL_FALSE_SEARCH.value:
-            queryset = queryset.exclude(in_favorites__user=self.request.user)
-
-        return queryset
-
-    @action(detail=True, permission_classes=(IsAuthenticated,))
-    def favorite(self, request: WSGIRequest, pk: int | str) -> Response:
-        """Добавляет/удалет рецепт в `избранное`.
-
-        Вызов метода через url: */recipe/<int:pk>/favorite/.
-
-        Args:
-            request (WSGIRequest): Объект запроса.
-            pk (int):
-                id рецепта, который нужно добавить/удалить из `избранного`.
-
-        Returns:
-            Responce: Статус подтверждающий/отклоняющий действие.
+    def _action_post_delete(self, pk, serializer_class):
         """
-
-    @favorite.mapping.post
-    def recipe_to_favorites(
-        self, request: WSGIRequest, pk: int | str
-    ) -> Response:
-        self.link_model = Favorites
-        return self._create_relation(pk)
-
-    @favorite.mapping.delete
-    def remove_recipe_from_favorites(
-        self, request: WSGIRequest, pk: int | str
-    ) -> Response:
-        self.link_model = Favorites
-        return self._delete_relation(Q(recipe__id=pk))
-
-    @action(detail=True, permission_classes=(IsAuthenticated,))
-    def shopping_cart(self, request: WSGIRequest, pk: int | str) -> Response:
-        """Добавляет/удалет рецепт в `список покупок`.
-
-        Вызов метода через url: */recipe/<int:pk>/shopping_cart/.
-
-        Args:
-            request (WSGIRequest): Объект запроса.
-            pk (int):
-                id рецепта, который нужно добавить/удалить в `корзину покупок`.
-
-        Returns:
-            Responce: Статус подтверждающий/отклоняющий действие.
-        """
-
-    @shopping_cart.mapping.post
-    def recipe_to_cart(self, request: WSGIRequest, pk: int | str) -> Response:
-        self.link_model = Carts
-        return self._create_relation(pk)
-
-    @shopping_cart.mapping.delete
-    def remove_recipe_from_cart(
-        self, request: WSGIRequest, pk: int | str
-    ) -> Response:
-        self.link_model = Carts
-        return self._delete_relation(Q(recipe__id=pk))
-
-    @action(methods=("get",), detail=False)
-    def download_shopping_cart(self, request: WSGIRequest) -> Response:
-        """Загружает файл *.txt со списком покупок.
-
-        Считает сумму ингредиентов в рецептах выбранных для покупки.
-        Возвращает текстовый файл со списком ингредиентов.
-        Вызов метода через url:  */recipes/download_shopping_cart/.
-
-        Args:
-            request (WSGIRequest): Объект запроса..
-
-        Returns:
-            Responce: Ответ с текстовым файлом.
+        Функция для добавления/удаления рецепта в списки.
         """
         user = self.request.user
-        if not user.carts.exists():
-            return Response(status=HTTP_400_BAD_REQUEST)
-
-        filename = f"{user.username}_shopping_list.txt"
-        shopping_list = create_shoping_list(user)
-        response = HttpResponse(
-            shopping_list, content_type="text.txt; charset=utf-8"
+        recipe = get_object_or_404(Recipe, pk=pk)
+        object = serializer_class.Meta.model.objects.filter(
+            user=user,
+            recipe=recipe
         )
-        response["Content-Disposition"] = f"attachment; filename={filename}"
+        if self.request.method == 'POST':
+            data = {'user': user.id, 'recipe': pk}
+            context = {'request': self.request}
+            serializer = serializer_class(data=data,
+                                          context=context)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if object.exists():
+            object.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'Этого рецепта не было в cписке'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True,
+            permission_classes=[permissions.IsAuthenticated],
+            methods=['POST', 'DELETE'])
+    def favorite(self, request, pk=None):
+        """Добавляет/удаляет рецепт в список избранного."""
+        return self._action_post_delete(pk, FavoriteRecipeSerializer)
+
+    @action(detail=True,
+            permission_classes=[permissions.IsAuthenticated],
+            methods=['POST', 'DELETE'], )
+    def shopping_cart(self, request, pk=None):
+        """Добавляет/удаляет рецепт в список покупок."""
+        return self._action_post_delete(pk, RecipeShoppingListSerializer)
+
+    @action(detail=False, permission_classes=[AuthorOnly])
+    def download_shopping_cart(self, request):
+        """Загружает .txt файл со списком покупок."""
+        ingredients = get_ingredients(request.user)
+        shopping_list = 'Список покупок:'
+        for ingredient in ingredients:
+            shopping_list += (
+                f"\n- {ingredient[0]} "
+                f"({ingredient[1]}) - "
+                f"{ingredient[2]}")
+        file = 'shopping_list.txt'
+        response = HttpResponse(shopping_list, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="{file}.txt"'
         return response
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """Вывод тегов."""
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
+    permission_classes = (permissions.AllowAny,)
+
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """Вывод ингредиентов."""
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    pagination_class = None
+    permission_classes = (permissions.AllowAny,)
+    filter_backends = (IngredientFilter,)
+    search_fields = ('^name', )
