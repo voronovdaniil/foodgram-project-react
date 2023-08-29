@@ -158,4 +158,4 @@ DJOSER = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = ['http://yandexfoodgramhub.ddns.net']
+CSRF_TRUSTED_ORIGINS = ["http://localhost, http://127.0.0.1"]
