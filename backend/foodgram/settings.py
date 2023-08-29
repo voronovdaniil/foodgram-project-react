@@ -10,7 +10,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="string_from_.env")
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=Csv())
+ALLOWED_HOSTS = ['51.250.110.255', '127.0.0.1', 'localhost', 'yandexfoodgram.ddns.net/']
+
+CSRF_TRUSTED_ORIGINS = ['https://yandexfoodgram.ddns.net', 'https://51.250.110.255']
 
 ROOT_URLCONF = "foodgram.urls"
 
