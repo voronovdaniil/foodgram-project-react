@@ -15,7 +15,7 @@ ALLOWED_HOSTS = ['51.250.110.255', 'localhost', '127.0.0.1', 'yandexfoodgramhub.
 
 CSRF_TRUSTED_ORIGINS = ['http://yandexfoodgramhub.ddns.net', 
                         'http://51.250.110.255',
-                        "http://localhost', 'http://127.0.0.1"]
+                        ]
 
 # Application definition
 
