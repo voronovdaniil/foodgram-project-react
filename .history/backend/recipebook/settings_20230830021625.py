@@ -14,7 +14,7 @@ DEBUG = False
 ALLOWED_HOSTS = ['51.250.110.255', 'localhost',
                  '127.0.0.1', 'yandexfoodgramhub.ddns.net']
 
-CSRF_TRUSTED_ORIGINS = http://yandexfoodgramhub.ddns.net http://51.250.110.255'
+CSRF_TRUSTED_ORIGINS = 'http://yandexfoodgramhub.ddns.net','http://51.250.110.255'
 
 # Application definition
 
