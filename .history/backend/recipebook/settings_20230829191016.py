@@ -14,6 +14,8 @@ ALLOWED_HOSTS = ['51.250.110.255', 'localhost', '127.0.0.1', 'yandexfoodgram.ddn
 
 CSRF_TRUSTED_ORIGINS = ['https://yandexfoodgram.ddns.net', 'https://51.250.110.255']
 
+
+
 # Application definition
 
 INSTALLED_APPS = [
