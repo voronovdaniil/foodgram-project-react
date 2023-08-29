@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'django_filters',
     'colorfield',
     'djoser',
-    'corsheaders',
+    # 'corsheaders',
 
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
