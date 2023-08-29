@@ -6,13 +6,13 @@ load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
 SECRET_KEY = os.getenv('TOKEN', 'default-token')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['51.250.110.255', 'localhost', '127.0.0.1', 'yandexfoodgram.ddns.net']
+ALLOWED_HOSTS = ['84.252.140.107', 'localhost', '127.0.0.1', 'recipebook.hopto.org']
 
-CSRF_TRUSTED_ORIGINS = ['https://yandexfoodgram.ddns.net/', 'https://127.0.0.1', 'https://51.250.110.255']
 
 # Application definition
 
@@ -74,10 +74,10 @@ WSGI_APPLICATION = 'recipebook.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'postgres'),
-        'USER': os.getenv('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DB_HOST', 'db'),
+        'NAME': os.getenv('POSTGRES_DB', 'django'),
+        'USER': os.getenv('POSTGRES_USER', 'django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', ''),
         'PORT': os.getenv('DB_PORT', 5432)
     }
 }

@@ -1,4 +1,4 @@
-# Проект «Продуктовый помощник» - Foodgram
+# Проект «Книга рецептов» - RecipeBook
 
 ### Описание проекта
 Проект представляет собой онлайн-сервис и API для него. Сервис позволяет публиковать любимые рецепты, подписываться на других авторов, составлять список из избранных рецептов, а перед походом в магазин - скачивать сводный список продуктов для выбранных рецептов.
@@ -20,7 +20,7 @@
 ### Запуск проекта в контейнерах
 - Клонирование удаленного репозитория
 ```bash
-git@github.com:AnnaMihailovna/foodgram-project-react.git
+git@github.com:AnnaMihailovna/RecipeBook-project-react.git
 cd infra
 ```
 - В директории /infra создайте файл .env с переменными окружения
@@ -36,7 +36,7 @@ docker compose exec backend python manage.py collectstatic
 sudo docker compose exec backend cp -r /app/collected_static/. /app/backend_static/static/
 docker compose exec backend python manage.py createsuperuser
 ```
-- Преднаполните базу данных ингредиентами и тегами.
+- Наполните базу данных ингредиентами и тегами
 ```bash
 docker compose exec backend python manage.py import
 ```
@@ -44,6 +44,32 @@ docker compose exec backend python manage.py import
 ### Суперпользователь:
 Логин: ```admin``` 
 
-Email: ```d.a.voronov550@gmail.com```  
-Пароль: ```erasmus2001``` 
+Email: ```admin@admin.xx```  
+Пароль: ```1234``` 
 
+### Тестовые пользователи:
+Логин: ```user3new```  
+Email: ```user3@user.xx```  
+Пароль: ```user3123456```
+
+--------------------------
+Логин: ```user7new```  
+Email: ```user7@user.xx```  
+Пароль: ```user7123456```
+
+--------------------------
+Логин: ```user9new```  
+Email: ```user9@user.xx```  
+Пароль: ```user9123456```
+
+## Ссылки
+### Документация API проекта:
+http://recipebook.hopto.org/api/docs/redoc.html
+
+### Развёрнутый проект:
+http://recipebook.hopto.org
+
+http://recipebook.hopto.org/admin/
+
+### Автор бэкенда и деплой
+[AnnaMihailovna](https://github.com/AnnaMihailovna/)
