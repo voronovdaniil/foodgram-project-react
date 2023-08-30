@@ -30,7 +30,7 @@ services:
       - backend
 
   nginx:
-    image: erasmus2001/foodgram_gateway
+    image: erasmus2001/recipebook_nginx
     env_file: ../.env
     ports:
       - "7000:80"
