@@ -1,4 +1,4 @@
-# Проект «Книга рецептов» - RecipeBook
+# Проект «Продуктовый помощник» - Foodgram
 
 ### Описание проекта
 Проект представляет собой онлайн-сервис и API для него. Сервис позволяет публиковать любимые рецепты, подписываться на других авторов, составлять список из избранных рецептов, а перед походом в магазин - скачивать сводный список продуктов для выбранных рецептов.
@@ -20,7 +20,7 @@
 ### Запуск проекта в контейнерах
 - Клонирование удаленного репозитория
 ```bash
-git@github.com:AnnaMihailovna/RecipeBook-project-react.git
+git@github.com:voronovdaniil/foodgram-project-react.git
 cd infra
 ```
 - В директории /infra создайте файл .env с переменными окружения
@@ -30,46 +30,26 @@ docker compose up -d --build
 ```
 - Выполните миграции, соберите статику, создайте суперпользователя
 ```bash
-docker compose exec backend python manage.py makemigrations
-docker compose exec backend python manage.py migrate
-docker compose exec backend python manage.py collectstatic
-sudo docker compose exec backend cp -r /app/collected_static/. /app/backend_static/static/
-docker compose exec backend python manage.py createsuperuser
+docker compose -f docker-compose.production.yml exec backend python manage.py makemigrations
+docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
+docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /app/backend_static/static/
+docker compose -f docker-compose.production.yml exec backend python manage.py createsuperuser
 ```
 - Наполните базу данных ингредиентами и тегами
 ```bash
-docker compose exec backend python manage.py import
+docker compose -f docker-compose.production.yml exec backend python manage.py import
 ```
 
 ### Суперпользователь:
 Логин: ```admin``` 
 
-Email: ```admin@admin.xx```  
-Пароль: ```1234``` 
-
-### Тестовые пользователи:
-Логин: ```user3new```  
-Email: ```user3@user.xx```  
-Пароль: ```user3123456```
-
---------------------------
-Логин: ```user7new```  
-Email: ```user7@user.xx```  
-Пароль: ```user7123456```
-
---------------------------
-Логин: ```user9new```  
-Email: ```user9@user.xx```  
-Пароль: ```user9123456```
+Email: ```d.a.voronov550@gmail.com```  
+Пароль: ```erasmus2001``` 
 
 ## Ссылки
-### Документация API проекта:
-http://recipebook.hopto.org/api/docs/redoc.html
 
 ### Развёрнутый проект:
-http://recipebook.hopto.org
+http://yandexfoodgramhub.ddns.net/
+http://yandexfoodgramhub.ddns.net/admin/
 
-http://recipebook.hopto.org/admin/
-
-### Автор бэкенда и деплой
-[AnnaMihailovna](https://github.com/AnnaMihailovna/)
