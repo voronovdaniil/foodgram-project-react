@@ -16,9 +16,7 @@ ALLOWED_HOSTS = ['http://yandex.foodgramhub.ddns.net',
                  'https://www.yandexfoodgramhub.ddns.net',
                  'http://51.250.110.255',
                  'https://51.250.110.255',
-                 'http://127.0.0.1',
-                 'https://127.0.0.1',
-                 'http://localhost']
+                 'http://127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = ['http://yandex.foodgramhub.ddns.net',
                         'https://yandexfoodgramhub.ddns.net',
