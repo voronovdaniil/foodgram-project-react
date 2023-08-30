@@ -16,7 +16,7 @@ ALLOWED_HOSTS = ['yandex.foodgramhub.ddns.net',
                  '127.0.0.1',
                  'localhost']
 
-CSRF_TRUSTED_ORIGINS = ['http://yandex.foodgramhub.ddns.net']
+CSRF_TRUSTED_ORIGINS = ['yandex.foodgramhub.ddns.net']
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^/api/.*$'
 
