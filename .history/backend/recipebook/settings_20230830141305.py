@@ -18,7 +18,6 @@ ALLOWED_HOSTS = ['yandex.foodgramhub.ddns.net',
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^/api/.*$'
-
 # Application definition
 
 INSTALLED_APPS = [
