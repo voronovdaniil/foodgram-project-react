@@ -14,7 +14,7 @@ DEBUG = False
 ALLOWED_HOSTS = ['51.250.110.255', 'localhost',
                  '127.0.0.1', 'yandexfoodgramhub.ddns.net']
 
-CSRF_TRUSTED_ORIGINS = ['51.250.110.255', 'http://yandexfoodgramhub.ddns.net']
+CSRF_TRUSTED_ORIGINS = ['http://yandexfoodgramhub.ddns.net', '51.250.110.255']
 
 # Application definition
 
@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'django_filters',
     'colorfield',
     'djoser',
-    # 'corsheaders',
+    'corsheaders',
 
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
@@ -41,7 +41,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -159,4 +159,5 @@ DJOSER = {
         'user_list': ['rest_framework.permissions.AllowAny'],
     },
 }
+
 
