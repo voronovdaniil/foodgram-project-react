@@ -12,11 +12,13 @@ SECRET_KEY = os.getenv('TOKEN', 'default-token')
 DEBUG = False
 
 ALLOWED_HOSTS = ['yandex.foodgramhub.ddns.net',
-                 '51.250.110.255',
-                 '127.0.0.1',
-                 'localhost']
+                 '/51.250.110.255',
+                 /127.0.0.1',
+                 'https://127.0.0.1',
+                 'http://localhost']
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_URLS_REGEX = r'^/api/.*$'
 
 # Application definition
 
