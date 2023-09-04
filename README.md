@@ -40,19 +40,3 @@ docker compose -f docker-compose.production.yml exec backend python manage.py cr
 ```bash
 docker compose -f docker-compose.production.yml exec backend python manage.py import
 ```
-
-### Суперпользователь:
-Логин: ```admin``` 
-
-Email: ```d.a.voronov550@gmail.com```  
-Пароль: ```erasmus2001``` 
-
-## Ссылки
-
-### Развёрнутый проект:
-http://yandexfoodgramhub.ddns.net/
-
-
-
-http://yandexfoodgramhub.ddns.net/admin/
-
